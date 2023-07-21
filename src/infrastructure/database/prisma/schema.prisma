@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  password  String
+  nama      String
+  role      String     @default("user")
+  mahasiswa Mahasiswa?
+
+  @@map("user")
+}
+
+model Mahasiswa {
+  id       Int        @id @default(autoincrement())
+  user     User       @relation(fields: [userId], references: [id])
+  userId   Int        @unique
+  nim      String     @unique
+  jurusan  String
+  peminjam Peminjam[]
+
+  @@map("mahasiswa")
+}
+
+model Buku {
+  id        Int        @id @default(autoincrement())
+  judul     String
+  penulis   String
+  kuantitas Int
+  tempat    String
+  peminjam  Peminjam[]
+
+  @@map("buku")
+}
+
+model Peminjam {
+  id                  Int       @id @default(autoincrement())
+  mahasiswa           Mahasiswa @relation(fields: [mahasiswaId], references: [id])
+  mahasiswaId         Int
+  buku                Buku      @relation(fields: [bukuId], references: [id])
+  bukuId              Int
+  tanggalPinjam       DateTime
+  batasPengembalian   DateTime
+  tanggalPengembalian DateTime?
+  denda               Int       @default(0)
+
+  @@map("peminjam")
+}
